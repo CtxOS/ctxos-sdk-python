@@ -1,4 +1,4 @@
 configured_endpoints: 2
 openapi_spec_url: https://storage.googleapis.com/stainless-sdk-openapi-specs/ctxos%2Fctxos-5bad4d14e1dfb7d8e256a124dd945cb5efb927a9232d469e8896976e8a6d6221.yml
 openapi_spec_hash: e2e61d288b0b6bb42341fbec6c1daf40
-config_hash: 0fc96bc6742a2b59d91f37d9865da225
+config_hash: 3405fc5a8fbcd96158bc93e16d63927d
