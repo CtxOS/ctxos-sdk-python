@@ -12,3 +12,6 @@ DEFAULT_CONNECTION_LIMITS = httpx.Limits(max_connections=100, max_keepalive_conn
 
 INITIAL_RETRY_DELAY = 0.5
 MAX_RETRY_DELAY = 8.0
+
+HUMAN_PROMPT = "\n\nHuman:"
+AI_PROMPT = "\n\nAssistant:"
