@@ -1,7 +1,7 @@
 name: Build SDKs for pull request
 
 env:
-  OAS_PATH: ./path/to/my/openapi.json
+  OAS_PATH: ./src/ctxos/openapi.json
   STAINLESS_ORG: ctxos
   STAINLESS_PROJECT: ctxos
 
