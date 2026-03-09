@@ -3,6 +3,7 @@
 import typing as _t
 
 from . import types
+from .tools import BaseTool as BaseTool, ToolUser as ToolUser
 from ._types import NOT_GIVEN, Omit, NoneType, NotGiven, Transport, ProxiesTypes, omit, not_given
 from ._utils import file_from_path
 from ._client import Ctxos, Client, Stream, Timeout, Transport, AsyncCtxos, AsyncClient, AsyncStream, RequestOptions
@@ -31,6 +32,8 @@ from ._utils._logs import setup_logging as _setup_logging
 
 __all__ = [
     "types",
+    "BaseTool",
+    "ToolUser",
     "__version__",
     "__title__",
     "NoneType",
