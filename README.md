@@ -76,19 +76,18 @@ pip install ctxos
 ## Usage
 
 ```python
-from ctxos import Ctxos, HUMAN_PROMPT, AI_PROMPT
+from ctxos import Ctxos
 
-ctxos = Ctxos(
+client = Ctxos(
     # defaults to os.environ.get("CTXOS_API_KEY")
     api_key="my api key",
 )
 
-completion = ctxos.completions.create(
+completion = client.complete.create(
     model="ctxos-1",
-    max_tokens_to_sample=300,
-    prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court? {AI_PROMPT}",
+    prompt="how does a court case get to the Supreme Court?",
 )
-print(completion.completion)
+print(completion.choices[0].text)
 ```
 
 While you can provide an `api_key` keyword argument, we recommend using [python-dotenv](https://pypi.org/project/python-dotenv/)
@@ -99,21 +98,20 @@ and adding `CTXOS_API_KEY="my api key"` to your `.env` file so that your API Key
 Simply import `AsyncCtxos` instead of `Ctxos` and use `await` with each API call:
 
 ```python
-from ctxos import Ctxos, HUMAN_PROMPT, AI_PROMPT
+from ctxos import AsyncCtxos
 
-ctxos = AsyncCtxos(
+client = AsyncCtxos(
     # defaults to os.environ.get("CTXOS_API_KEY")
     api_key="my api key",
 )
 
 
 async def main():
-    completion = await ctxos.completions.create(
+    completion = await client.complete.create(
         model="ctxos-1",
-        max_tokens_to_sample=300,
-        prompt=f"{HUMAN_PROMPT} how does a court case get to the Supreme Court? {AI_PROMPT}",
+        prompt="how does a court case get to the Supreme Court?",
     )
-    print(completion.completion)
+    print(completion.choices[0].text)
 
 
 asyncio.run(main())
@@ -126,24 +124,39 @@ Functionality between the synchronous and asynchronous clients is otherwise iden
 We provide support for streaming responses using Server Side Events (SSE).
 
 ```python
-from ctxos import Ctxos, HUMAN_PROMPT, AI_PROMPT
+from ctxos import Ctxos
 
-ctxos = Ctxos()
+client = Ctxos()
 
-stream = ctxos.completions.create(
-    prompt=f"{HUMAN_PROMPT} Your prompt here {AI_PROMPT}",
-    max_tokens_to_sample=300,
+stream = client.complete.create(
+    prompt="Your prompt here",
     model="ctxos-1",
     stream=True,
 )
 for completion in stream:
-    print(completion.completion)
+    print(completion.choices[0].text)
 ```
 
 The async client uses the exact same interface.
 
 ```python
-from ctxos import Ctxos, HUMAN_PROMPT, AI_PROMPT
+from ctxos import AsyncCtxos
+
+client = AsyncCtxos()
+
+stream = await client.complete.create(
+    prompt="Your prompt here",
+    model="ctxos-1",
+    stream=True,
+)
+async for completion in stream:
+    print(completion.choices[0].text)
+```
+
+The async client uses the exact same interface.
+
+```python
+from ctxos import AsyncCtxos
 
 ctxos = AsyncCtxos()
 
@@ -155,6 +168,106 @@ stream = await ctxos.completions.create(
 )
 async for completion in stream:
     print(completion.completion)
+```
+
+## Tools / Function Calling
+
+The SDK supports tools (also known as function calling), allowing the model to call your Python functions and return structured data.
+
+### Defining Tools
+
+Use the `function_tool` helper to convert Python functions into tool definitions:
+
+```python
+from ctxos import Ctxos
+from ctxos.types import function_tool
+
+def get_weather(location: str, unit: str = "celsius") -> str:
+    """Get the weather for a location."""
+    return f"Weather in {location}: 72 degrees {unit}"
+
+def get_stock_price(symbol: str) -> float:
+    """Get the current stock price for a symbol."""
+    return 150.25
+
+client = Ctxos()
+
+# Create tool definitions
+tools = [
+    function_tool(get_weather),
+    function_tool(get_stock_price),
+]
+```
+
+### Calling with Tools
+
+```python
+response = client.completions.create(
+    model="ctxos-1",
+    prompt="What's the weather in San Francisco and what's AAPL's stock price?",
+    tools=tools,
+)
+
+# Process tool calls from the response
+for choice in response.choices or []:
+    if choice.tool_calls:
+        for tool_call in choice.tool_calls:
+            print(f"Called: {tool_call.function.name}")
+            print(f"Arguments: {tool_call.function.arguments}")
+```
+
+### Tool Choice
+
+Control which tool the model calls using `tool_choice`:
+
+```python
+# Allow the model to decide (default)
+response = client.completions.create(
+    model="ctxos-1",
+    prompt="What's the weather?",
+    tools=tools,
+    tool_choice="auto",
+)
+
+# Force a specific tool
+response = client.completions.create(
+    model="ctxos-1",
+    prompt="What's the weather?",
+    tools=tools,
+    tool_choice={"type": "function", "function": {"name": "get_weather"}},
+)
+
+# Disable tool calling
+response = client.completions.create(
+    model="ctxos-1",
+    prompt="Hello!",
+    tools=tools,
+    tool_choice="none",
+)
+```
+
+### Manual Tool Definition
+
+You can also define tools manually using dictionaries:
+
+```python
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get the weather for a location",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {"type": "string", "description": "City name"},
+                    "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
+                },
+                "required": ["location"],
+            },
+        }
+    }
+]
 ```
 
 ## Using Types
@@ -173,14 +286,13 @@ response), a subclass of `ctxos.APIStatusError` will be raised, containing `stat
 All errors inherit from `ctxos.APIError`.
 
 ```python
-from ctxos import Ctxos, HUMAN_PROMPT, AI_PROMPT
+from ctxos import Ctxos
 
-ctxos = Ctxos()
+client = Ctxos()
 
 try:
-    ctxos.completions.create(
-        prompt=f"{HUMAN_PROMPT} Your prompt here {AI_PROMPT}",
-        max_tokens_to_sample=300,
+    client.complete.create(
+        prompt="Your prompt here",
         model="ctxos-1",
     )
 except ctxos.APIConnectionError as e:
@@ -216,18 +328,17 @@ and >=500 Internal errors will all be retried by default.
 You can use the `max_retries` option to configure or disable this:
 
 ```python
-from ctxos import Ctxos, HUMAN_PROMPT, AI_PROMPT
+from ctxos import Ctxos
 
 # Configure the default for all requests:
-ctxos = Ctxos(
+client = Ctxos(
     # default is 2
     max_retries=0,
 )
 
 # Or, configure per-request:
-ctxos.with_options(max_retries=5).completions.create(
-    prompt=f"{HUMAN_PROMPT} Can you help me effectively ask for a raise at work? {AI_PROMPT}",
-    max_tokens_to_sample=300,
+client.with_options(max_retries=5).complete.create(
+    prompt="Can you help me effectively ask for a raise at work?",
     model="ctxos-1",
 )
 ```
@@ -238,23 +349,23 @@ Requests time out after 60 seconds by default. You can configure this with a `ti
 which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/#fine-tuning-the-configuration):
 
 ```python
-from ctxos import Ctxos, HUMAN_PROMPT, AI_PROMPT
+import httpx
+from ctxos import Ctxos
 
 # Configure the default for all requests:
-ctxos = Ctxos(
+client = Ctxos(
     # default is 60s
     timeout=20.0,
 )
 
 # More granular control:
-ctxos = Ctxos(
+client = Ctxos(
     timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
 )
 
 # Override per-request:
-ctxos.with_options(timeout=5 * 1000).completions.create(
-    prompt=f"{HUMAN_PROMPT} Where can I get a good coffee in my neighbourhood? {AI_PROMPT}",
-    max_tokens_to_sample=300,
+client.with_options(timeout=5 * 1000).complete.create(
+    prompt="Where can I get a good coffee in my neighbourhood?",
     model="ctxos-1",
 )
 ```
@@ -304,4 +415,4 @@ We are keen for your feedback; please open an [issue](https://www.github.com/ctx
 
 ## Requirements
 
-Python 3.7 or higher.
+Python 3.9 or higher.
