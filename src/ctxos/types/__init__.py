@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+from .tool import (
+    Tool as Tool,
+    Function as Function,
+    ToolCall as ToolCall,
+    ToolChoice as ToolChoice,
+    FunctionTool as FunctionTool,
+    function_tool as function_tool,
+)
 from .token_count_params import TokenCountParams as TokenCountParams
 from .token_count_response import TokenCountResponse as TokenCountResponse
 from .complete_create_params import CompleteCreateParams as CompleteCreateParams

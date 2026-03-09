@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import List, Union
+
 import httpx
 
 from ..types import complete_create_params
@@ -15,6 +17,7 @@ from .._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
+from ..types.tool import Tool, ToolChoice
 from .._base_client import make_request_options
 from ..types.complete_create_response import CompleteCreateResponse
 
@@ -48,6 +51,8 @@ class CompleteResource(SyncAPIResource):
         prompt: str,
         max_tokens: int | Omit = omit,
         temperature: float | Omit = omit,
+        tools: List[Tool] | Omit = omit,
+        tool_choice: Union[str, ToolChoice] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -59,6 +64,10 @@ class CompleteResource(SyncAPIResource):
         Create completion
 
         Args:
+          tools: A list of tools the model may call. The model will determine which (if any) function to call.
+
+          tool_choice: Controls which (if any) function is called by the model. Can be "none", "auto", or a specific function name.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -75,6 +84,8 @@ class CompleteResource(SyncAPIResource):
                     "prompt": prompt,
                     "max_tokens": max_tokens,
                     "temperature": temperature,
+                    "tools": tools,
+                    "tool_choice": tool_choice,
                 },
                 complete_create_params.CompleteCreateParams,
             ),
@@ -112,6 +123,8 @@ class AsyncCompleteResource(AsyncAPIResource):
         prompt: str,
         max_tokens: int | Omit = omit,
         temperature: float | Omit = omit,
+        tools: List[Tool] | Omit = omit,
+        tool_choice: Union[str, ToolChoice] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -123,6 +136,10 @@ class AsyncCompleteResource(AsyncAPIResource):
         Create completion
 
         Args:
+          tools: A list of tools the model may call. The model will determine which (if any) function to call.
+
+          tool_choice: Controls which (if any) function is called by the model. Can be "none", "auto", or a specific function name.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -139,6 +156,8 @@ class AsyncCompleteResource(AsyncAPIResource):
                     "prompt": prompt,
                     "max_tokens": max_tokens,
                     "temperature": temperature,
+                    "tools": tools,
+                    "tool_choice": tool_choice,
                 },
                 complete_create_params.CompleteCreateParams,
             ),

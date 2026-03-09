@@ -244,7 +244,7 @@ wheels = [
 
 [[package]]
 name = "ctxos"
-version = "0.0.1"
+version = "0.0.3"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },
