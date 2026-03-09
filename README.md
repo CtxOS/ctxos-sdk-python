@@ -270,6 +270,62 @@ tools = [
 ]
 ```
 
+### BaseTool and ToolUser
+
+For a more structured approach to tool calling, you can use the `BaseTool` class and `ToolUser` helper.
+
+#### Defining a Tool with BaseTool
+
+```python
+from ctxos.tools import BaseTool
+
+class GetWeatherTool(BaseTool):
+    def use_tool(self, location: str, unit: str = "celsius") -> str:
+        return f"Weather in {location}: 72 degrees {unit}"
+
+# Instantiate with name, description, and parameters
+weather_tool = GetWeatherTool(
+    name="get_weather",
+    description="Get the weather for a location",
+    parameters=[
+        {"name": "location", "type": "str", "description": "City name"},
+        {"name": "unit", "type": "str", "description": "Temperature unit (celsius/fahrenheit)"},
+    ]
+)
+```
+
+#### Using ToolUser
+
+```python
+from ctxos.tools import BaseTool, ToolUser
+
+# Create your tools
+class GetWeatherTool(BaseTool):
+    def use_tool(self, location: str) -> str:
+        return f"Weather in {location}: 72 degrees"
+
+# Create a ToolUser with your tools
+tool_user = ToolUser([GetWeatherTool(
+    name="get_weather",
+    description="Get the weather for a location",
+    parameters=[
+        {"name": "location", "type": "str", "description": "City name"},
+    ]
+)])
+
+# Manual mode - returns tool arguments for you to execute
+messages = [{"role": "user", "content": "What's the weather in Los Angeles?"}]
+result = tool_user.use_tools(messages, execution_mode="manual")
+print(result)
+# Returns tool_inputs message with tool_arguments for you to execute
+
+# Automatic mode - executes the tool automatically
+messages = [{"role": "user", "content": "What's the weather in Los Angeles?"}]
+result = tool_user.use_tools(messages, execution_mode="automatic")
+print(result)
+# Executes the tool and returns the final assistant response
+```
+
 ## Using Types
 
 Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typing.html#typing.TypedDict), while responses are [Pydantic](https://pydantic-docs.helpmanual.io/) models. This helps provide autocomplete and documentation within your editor.
