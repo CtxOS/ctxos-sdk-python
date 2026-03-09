@@ -2,7 +2,7 @@
 
 import asyncio
 
-from ctxos import AI_PROMPT, HUMAN_PROMPT, Ctxos, APIStatusError, AsyncCtxos
+from ctxos import Ctxos, AsyncCtxos, APIStatusError
 
 client = Ctxos()
 async_client = AsyncCtxos()
@@ -12,46 +12,35 @@ Hey Ctxos! How can I recursively list all files in a directory in Python?
 """
 
 
-def sync_stream() -> None:
-    stream = client.completions.create(
-        prompt=f"{HUMAN_PROMPT} {question}{AI_PROMPT}",
+def sync_request() -> None:
+    response = client.complete.create(
+        prompt=question,
         model="ctxos-1",
-        stream=True,
-        max_tokens_to_sample=300,
+        max_tokens=300,
     )
-
-    for completion in stream:
-        print(completion.completion, end="")
-
-    print()
+    print(response.choices[0].text)  # type: ignore[index]
 
 
-async def async_stream() -> None:
-    stream = await async_client.completions.create(
-        prompt=f"{HUMAN_PROMPT} {question}{AI_PROMPT}",
+async def async_request() -> None:
+    response = await async_client.complete.create(
+        prompt=question,
         model="ctxos-1",
-        stream=True,
-        max_tokens_to_sample=300,
+        max_tokens=300,
     )
-
-    async for completion in stream:
-        print(completion.completion, end="")
-
-    print()
+    print(response.choices[0].text)  # type: ignore[index]
 
 
-def stream_error() -> None:
+def request_error() -> None:
     try:
-        client.completions.create(
-            prompt=f"{HUMAN_PROMPT}{question}{AI_PROMPT}",
+        client.complete.create(
+            prompt=question,
             model="Ctxos-unknown-model",
-            stream=True,
-            max_tokens_to_sample=300,
+            max_tokens=300,
         )
     except APIStatusError as err:
         print(f"Caught API status error with response body: {err.response.text}")
 
 
-sync_stream()
-asyncio.run(async_stream())
-stream_error()
+sync_request()
+asyncio.run(async_request())
+request_error()

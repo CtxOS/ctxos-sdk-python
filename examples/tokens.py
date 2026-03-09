@@ -10,22 +10,20 @@ def sync_tokens() -> None:
 
     text = "hello world!"
 
-    tokens = client.count_tokens(text)
-    print(f"'{text}' is {tokens} tokens")
-
-    assert tokens == 3
+    tokens = client.tokens.count(input=text)
+    print(f"'{text}' is {tokens.tokens} tokens")
 
 
 async def async_tokens() -> None:
     ctxos = AsyncCtxos()
 
-    text = "fist message"
-    tokens = await ctxos.count_tokens(text)
-    print(f"'{text}' is {tokens} tokens")
+    text = "first message"
+    tokens = await ctxos.tokens.count(input=text)
+    print(f"'{text}' is {tokens.tokens} tokens")
 
     text = "second message"
-    tokens = await ctxos.count_tokens(text)
-    print(f"'{text}' is {tokens} tokens")
+    tokens = await ctxos.tokens.count(input=text)
+    print(f"'{text}' is {tokens.tokens} tokens")
 
 
 sync_tokens()

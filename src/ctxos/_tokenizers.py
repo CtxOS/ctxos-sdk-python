@@ -7,8 +7,8 @@ from anyio import Path as AsyncPath
 
 # tokenizers is untyped, https://github.com/huggingface/tokenizers/issues/811
 # note: this comment affects the entire file
-# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false
-from tokenizers import Tokenizer  # type: ignore[import]
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false, reportReturnType=false
+from tokenizers import Tokenizer  # type: ignore[import, reportMissingTypeStubs]
 
 
 def _get_tokenizer_cache_path() -> Path:
@@ -18,14 +18,14 @@ def _get_tokenizer_cache_path() -> Path:
 _tokenizer: Tokenizer | None = None
 
 
-def _load_tokenizer(raw: str) -> Tokenizer:
+def _load_tokenizer(raw: str) -> "Tokenizer":  # type: ignore[return-value]
     global _tokenizer
 
     _tokenizer = cast(Tokenizer, Tokenizer.from_str(raw))
     return _tokenizer
 
 
-def sync_get_tokenizer() -> Tokenizer:
+def sync_get_tokenizer() -> "Tokenizer":  # type: ignore[return-value]
     if _tokenizer is not None:
         return _tokenizer
 
@@ -34,7 +34,7 @@ def sync_get_tokenizer() -> Tokenizer:
     return _load_tokenizer(text)
 
 
-async def async_get_tokenizer() -> Tokenizer:
+async def async_get_tokenizer() -> "Tokenizer":  # type: ignore[return-value]
     if _tokenizer is not None:
         return _tokenizer
 
