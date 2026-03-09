@@ -158,16 +158,15 @@ The async client uses the exact same interface.
 ```python
 from ctxos import AsyncCtxos
 
-ctxos = AsyncCtxos()
+client = AsyncCtxos()
 
-stream = await ctxos.completions.create(
-    prompt=f"{HUMAN_PROMPT} Your prompt here {AI_PROMPT}",
-    max_tokens_to_sample=300,
+stream = await client.complete.create(
+    prompt="Your prompt here",
     model="ctxos-1",
     stream=True,
 )
 async for completion in stream:
-    print(completion.completion)
+    print(completion.choices[0].text)
 ```
 
 ## Tools / Function Calling
@@ -202,7 +201,7 @@ tools = [
 ### Calling with Tools
 
 ```python
-response = client.completions.create(
+response = client.complete.create(
     model="ctxos-1",
     prompt="What's the weather in San Francisco and what's AAPL's stock price?",
     tools=tools,
@@ -222,7 +221,7 @@ Control which tool the model calls using `tool_choice`:
 
 ```python
 # Allow the model to decide (default)
-response = client.completions.create(
+response = client.complete.create(
     model="ctxos-1",
     prompt="What's the weather?",
     tools=tools,
@@ -230,7 +229,7 @@ response = client.completions.create(
 )
 
 # Force a specific tool
-response = client.completions.create(
+response = client.complete.create(
     model="ctxos-1",
     prompt="What's the weather?",
     tools=tools,
@@ -238,7 +237,7 @@ response = client.completions.create(
 )
 
 # Disable tool calling
-response = client.completions.create(
+response = client.complete.create(
     model="ctxos-1",
     prompt="Hello!",
     tools=tools,
