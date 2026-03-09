@@ -2,6 +2,7 @@
 
 from typing import List, Optional
 
+from .tool import ToolCall
 from .._models import BaseModel
 
 __all__ = ["CompleteCreateResponse", "Choice", "Usage"]
@@ -13,6 +14,8 @@ class Choice(BaseModel):
     index: Optional[int] = None
 
     text: Optional[str] = None
+
+    tool_calls: Optional[List[ToolCall]] = None
 
 
 class Usage(BaseModel):
