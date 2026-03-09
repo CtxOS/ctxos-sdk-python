@@ -1,8 +1,6 @@
 import json
 from typing import Any, Dict, List, Optional
 
-from .. import Ctxos
-
 __all__ = ["BaseTool", "ToolUser"]
 
 
@@ -110,6 +108,8 @@ class ToolUser:
         Returns:
             Updated messages list including tool_inputs/tool_outputs
         """
+        from .. import Ctxos
+
         client = Ctxos()
         tool_definitions = [tool.to_dict() for tool in self.tools]  # type: ignore[list-item]
 
@@ -124,7 +124,7 @@ class ToolUser:
             return messages
 
         choice = choices[0]
-        if choice is None:
+        if not choice:
             return messages
 
         tool_calls = choice.tool_calls
@@ -198,11 +198,12 @@ class ToolUser:
                 tools=tool_definitions,  # type: ignore[arg-type]
             )
 
-            second_choice = second_response.choices[0]
+            second_choices = second_response.choices
+            second_text = second_choices[0].text if second_choices and second_choices[0].text else ""
             messages.append(
                 {
                     "role": "assistant",
-                    "content": second_choice.text if second_choice and second_choice.text else "",
+                    "content": second_text,
                 }
             )
         else:
